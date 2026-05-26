@@ -1,0 +1,46 @@
+##  Overview :
+The notebook:
+1. **Loads MNIST** via `tensorflow_datasets`.
+2. **Creates synthetic data** by placing each 28×28 digit at a random position inside a 75×75 canvas, producing both the image and the ground‑truth bounding box.
+3. **Defines a CNN** with three convolutional + pooling blocks followed by a dense layer.
+4. **Splits the dense layer** into two output branches.
+5. **Compiles the model** with two losses: `categorical_crossentropy` for classification and `mse` for bounding box regression.
+6. **Trains for 5 epochs** using a custom batch‑shuffling pipeline.
+7. **Evaluates** and visualizes predictions (class + bounding box) alongside ground truth.
+
+---
+
+##  Training Setup :
+
+- **Optimizer**: Adam (default learning rate)
+- **Loss**:
+  - Classification: `categorical_crossentropy`
+  - Bounding box: `mean squared error` (MSE)
+- **Metrics**:
+  - Classification: `accuracy`
+  - Bounding box: `mse`
+- **Batch size**: 64 × number of replicas (distributed strategy used)
+- **Epochs**: 5
+- **Data augmentation**: random placement of each digit (position varies per epoch)
+- **Preprocessing**: images scaled to `[0,1]`, bounding boxes normalized to `[0,1]` relative to canvas size.
+
+### Data Generation
+Each training sample is produced on the fly:
+- A random `(xmin, ymin)` offset (0–48) is chosen.
+- The 28×28 MNIST digit is placed at that offset inside a 75×75 canvas.
+- Bounding box coordinates are converted to normalized values:  
+  `xmin/75, ymin/75, (xmin+28)/75, (ymin+28)/75`.
+
+The dataset is shuffled, batched, and prefetched for performance.
+
+---
+
+## 📈 Results (after 5 epochs)
+
+| Metric                     | Training (last epoch) | Validation |
+|----------------------------|----------------------|------------|
+| Classification Loss        | ≈0.79                | 0.73       |
+| Classification Accuracy    | ≈75.6%               | 75.4%      |
+| Bounding Box MSE           | ≈0.0185              | 0.0202     |
+
+The model learns to localize digits reasonably well and classify most of them correctly, despite the small training budget (5 epochs). With more epochs, accuracy and IoU would improve.
