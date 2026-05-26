@@ -7,7 +7,6 @@ It is a complete pipeline for detecting and classifying digits from randomly pla
 This notebook demonstrates a multi‑task learning approach where the same feature extractor feeds two output heads:  
 - **Classification head** (10‑class softmax)  
 - **Bounding box regression head** (4‑unit linear output for normalized coordinates)
-
 ---
 ## How to Run :
 
